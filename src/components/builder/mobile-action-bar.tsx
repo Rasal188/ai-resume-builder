@@ -4,6 +4,7 @@ import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Save, Download, Loader2 } from "lucide-react"
 import { useResume } from "@/components/ResumeContext"
+import { exportResumePdf } from "@/lib/exportResumePdf"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
@@ -42,35 +43,10 @@ export function MobileActionBar({ resumeId }: { resumeId: string }) {
     }, [resumeData, template, resumeId, router])
 
     const handleExportPDF = useCallback(async () => {
-        // getElementById works regardless of where in the tree this component sits
-        const resumeElement = document.getElementById("resume-preview-target")
-        if (!resumeElement) {
-            toast.error("Resume preview not found")
-            return
-        }
+        const fileName = `${resumeData.personalInfo.firstName || "Resume"}_${resumeData.personalInfo.lastName || ""}.pdf`.replace(/\s+/g, "_")
         setIsExporting(true)
         try {
-            const htmlToExport = `<html><head><style>
-                @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
-                body{background:white;color:black;-webkit-print-color-adjust:exact;font-family:sans-serif;}
-            </style></head><body>${resumeElement.outerHTML}</body></html>`
-
-            const response = await fetch("/api/export-pdf", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ html: htmlToExport }),
-            })
-            if (!response.ok) throw new Error("PDF generation failed")
-            const blob = await response.blob()
-            const url = URL.createObjectURL(blob)
-            const link = document.createElement("a")
-            link.href = url
-            link.download = `${resumeData.personalInfo.firstName || "Resume"}_${resumeData.personalInfo.lastName || ""}.pdf`.replace(/\s+/g, "_")
-            link.click()
-            URL.revokeObjectURL(url)
-        } catch (error) {
-            console.error("Export PDF error:", error)
-            toast.error("Failed to export PDF")
+            await exportResumePdf(fileName)
         } finally {
             setIsExporting(false)
         }

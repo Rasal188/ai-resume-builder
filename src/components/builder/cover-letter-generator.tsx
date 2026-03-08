@@ -70,50 +70,21 @@ export function CoverLetterGenerator() {
     }
 
     const handleExportPDF = async () => {
-        const letterElement = targetRef.current;
-        if (!letterElement || !coverLetter) return;
-
+        if (typeof window === "undefined") return
+        const letterElement = targetRef.current
+        if (!letterElement || !coverLetter) return
         try {
-            const htmlToExport = `
-                <html>
-                    <head>
-                        <style>
-                            body {
-                                background-color: white;
-                                color: black;
-                                -webkit-print-color-adjust: exact;
-                                font-family: serif;
-                                padding: 2rem;
-                            }
-                            p { margin-bottom: 1rem; line-height: 1.5; }
-                        </style>
-                    </head>
-                    <body>
-                        ${letterElement.outerHTML}
-                    </body>
-                </html>
-            `;
-
-            const response = await fetch("/api/export-pdf", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ html: htmlToExport })
-            });
-
-            if (!response.ok) throw new Error("PDF generation failed");
-
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `${resumeData.personalInfo.firstName || "Applicant"}_Cover_Letter.pdf`.replace(/\s+/g, "_");
-            link.click();
-            URL.revokeObjectURL(url);
+            const html2canvas = (await import("html2canvas")).default
+            const { jsPDF } = await import("jspdf")
+            const canvas = await html2canvas(letterElement, { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false })
+            const imgData = canvas.toDataURL("image/png")
+            const pdf = new jsPDF("p", "px", [canvas.width, canvas.height])
+            pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height)
+            const fileName = `${resumeData.personalInfo.firstName || "Applicant"}_Cover_Letter.pdf`.replace(/\s+/g, "_")
+            pdf.save(fileName)
         } catch (error) {
-            console.error("Failed to export PDF:", error);
-            toast.error("Failed to generate PDF document");
+            console.error("Failed to export PDF:", error)
+            toast.error("Failed to generate PDF document")
         }
     }
 

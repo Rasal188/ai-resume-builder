@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Save, Loader2, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, Save, Loader2, CheckCircle2, Download } from "lucide-react"
+import { exportResumePdf } from "@/lib/exportResumePdf"
 import { useResume } from "@/components/ResumeContext"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { toast } from "sonner"
@@ -14,7 +15,6 @@ export function BuilderHeader({ resumeId }: { resumeId: string }) {
     const [lastSaved, setLastSaved] = useState<Date | null>(null)
     const router = useRouter()
 
-    // Track initial mount to prevent immediate auto-save
     const isInitialMount = useRef(true)
 
     const handleSave = useCallback(async (showToast = true) => {
@@ -35,8 +35,6 @@ export function BuilderHeader({ resumeId }: { resumeId: string }) {
             })
 
             if (!res.ok) {
-                const errorResponse = await res.json()
-                console.error("API response error:", errorResponse)
                 throw new Error("Failed to save resume")
             }
 
@@ -49,7 +47,6 @@ export function BuilderHeader({ resumeId }: { resumeId: string }) {
                     toast.success("Resume saved successfully")
                 }
 
-                // If new resume, silently replace the URL so future saves update the new record
                 if (resumeId === "new" && data.resumeId) {
                     router.replace(`/builder/${data.resumeId}`)
                 }
@@ -67,7 +64,6 @@ export function BuilderHeader({ resumeId }: { resumeId: string }) {
         }
     }, [resumeData, template, resumeId, router])
 
-    // Auto-save logic
     useEffect(() => {
         if (isInitialMount.current) {
             isInitialMount.current = false
@@ -75,13 +71,11 @@ export function BuilderHeader({ resumeId }: { resumeId: string }) {
         }
 
         const timer = setTimeout(() => {
-            // Delay for 10 seconds. Silent save background task
             if (resumeId !== "new") {
                 handleSave(false)
             }
         }, 10000)
 
-        // Cleanup the timer on data change or unmount
         return () => clearTimeout(timer)
     }, [resumeData, template, handleSave, resumeId])
 
@@ -96,26 +90,43 @@ export function BuilderHeader({ resumeId }: { resumeId: string }) {
             </div>
 
             <div className="hidden md:flex items-center gap-4">
+
                 {lastSaved && !isSaving && (
-                    <span className="text-xs font-medium text-secondary/60 flex items-center gap-1 animate-in fade-in zoom-in duration-300">
+                    <span className="text-xs font-medium text-secondary/60 flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3 text-green-500" /> Saved
                     </span>
                 )}
+
                 {isSaving && (
-                    <span className="text-xs font-medium text-secondary/60 flex items-center gap-1 animate-in fade-in duration-300">
+                    <span className="text-xs font-medium text-secondary/60 flex items-center gap-1">
                         <Loader2 className="w-3 h-3 animate-spin text-accent" /> Saving...
                     </span>
                 )}
 
+                {/* EXPORT BUTTON */}
+                <Button
+                    onClick={exportResumePdf}
+                    size="sm"
+                    className="gap-2 rounded-xl bg-secondary text-white hover:bg-secondary/90"
+                >
+                    <Download className="h-4 w-4" />
+                    Export PDF
+                </Button>
+
+                {/* SAVE BUTTON */}
                 <Button
                     onClick={() => handleSave(true)}
                     disabled={isSaving}
                     size="sm"
-                    className="gap-2 rounded-xl bg-primary text-white hover:bg-primary/90 shadow-[0_4px_15px_rgba(75,46,31,0.2)] transition-all min-w-[80px]"
+                    className="gap-2 rounded-xl bg-primary text-white hover:bg-primary/90"
                 >
-                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    {isSaving
+                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                        : <Save className="h-4 w-4" />
+                    }
                     Save
                 </Button>
+
             </div>
         </header>
     )

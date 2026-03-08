@@ -10,6 +10,7 @@ import { TemplateMinimal } from "@/components/builder/preview/templates/minimal"
 import { TemplateProfessional } from "@/components/builder/preview/templates/professional"
 import { TemplateCorporate } from "@/components/builder/preview/templates/corporate"
 import { TemplateCreative } from "@/components/builder/preview/templates/creative"
+import { exportResumePdf } from "@/lib/exportResumePdf"
 import {
     ArrowLeft,
     Save,
@@ -69,32 +70,12 @@ export function BuilderPageClient({ resumeId }: { resumeId: string }) {
         return () => clearTimeout(t)
     }, [resumeData, template, handleSave, resumeId])
 
-    /* ─── Export PDF ─────────────────────────────────────────────── */
+    /* ─── Export PDF (client-side via shared utility) ────────────── */
     const handleExportPDF = useCallback(async () => {
-        const el = resumeRef.current
-        if (!el) return
+        const fileName = `${resumeData.personalInfo.firstName || "Resume"}_${resumeData.personalInfo.lastName || ""}.pdf`.replace(/\s+/g, "_")
         setIsExporting(true)
         try {
-            const html = `<html><head><style>
-                @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
-                body{background:white;color:black;-webkit-print-color-adjust:exact;font-family:sans-serif;}
-            </style></head><body>${el.outerHTML}</body></html>`
-            const res = await fetch("/api/export-pdf", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ html }),
-            })
-            if (!res.ok) throw new Error("PDF generation failed")
-            const blob = await res.blob()
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement("a")
-            a.href = url
-            a.download = `${resumeData.personalInfo.firstName || "Resume"}_${resumeData.personalInfo.lastName || ""}.pdf`.replace(/\s+/g, "_")
-            a.click()
-            URL.revokeObjectURL(url)
-        } catch (err) {
-            console.error("Export error:", err)
-            toast.error("Failed to export PDF")
+            await exportResumePdf(fileName)
         } finally {
             setIsExporting(false)
         }
@@ -209,8 +190,9 @@ export function BuilderPageClient({ resumeId }: { resumeId: string }) {
                                 </div>
                             </div>
 
-                            {/* Desktop-only Export PDF */}
+                            {/* Original Export PDF button — this is the source of truth */}
                             <Button
+                                id="real-export-pdf"
                                 onClick={handleExportPDF}
                                 disabled={isExporting}
                                 className="hidden md:flex gap-2"
@@ -225,7 +207,7 @@ export function BuilderPageClient({ resumeId }: { resumeId: string }) {
                         {/* Resume preview scroll area */}
                         <div className="flex-1 overflow-auto p-4 md:p-8 flex items-start justify-center custom-scrollbar">
                             <div className="bg-white shadow-[0_10px_40px_rgba(75,46,31,0.08)] rounded-md overflow-hidden w-full max-w-[850px] border border-primary/5">
-                                <div ref={resumeRef} className="w-full bg-white text-black min-h-[1056px]">
+                                <div id="resume-preview" ref={resumeRef} className="w-full bg-white text-black min-h-[1056px]">
                                     {renderTemplate()}
                                 </div>
                             </div>
