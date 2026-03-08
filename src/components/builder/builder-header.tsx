@@ -95,7 +95,7 @@ export function BuilderHeader({ resumeId }: { resumeId: string }) {
                 </Link>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4">
                 {lastSaved && !isSaving && (
                     <span className="text-xs font-medium text-secondary/60 flex items-center gap-1 animate-in fade-in zoom-in duration-300">
                         <CheckCircle2 className="w-3 h-3 text-green-500" /> Saved

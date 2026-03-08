@@ -132,6 +132,59 @@ const templates = [
             </div>
         )
     },
+    {
+        id: "ats-optimized",
+        name: "ATS Optimized",
+        description: "Minimal, ATS-friendly layout designed to pass Applicant Tracking Systems.",
+        badge: "New",
+        accentColor: "bg-slate-700",
+        preview: (
+            <div className="w-full h-full bg-white p-4 flex flex-col gap-2">
+                <div className="border-b-2 border-slate-800 pb-2 mb-2">
+                    <div className="h-4 bg-slate-800 w-2/3 rounded-sm mb-1" />
+                    <div className="h-2 bg-slate-400 w-1/2 rounded-sm" />
+                    <div className="flex gap-3 mt-1.5">
+                        <div className="h-2 bg-slate-300 w-16 rounded-sm" />
+                        <div className="h-2 bg-slate-300 w-20 rounded-sm" />
+                    </div>
+                </div>
+                <div className="h-2.5 bg-slate-700 w-1/4 rounded-sm mb-1" />
+                <div className="h-2 bg-slate-200 w-full rounded-sm" />
+                <div className="h-2 bg-slate-200 w-5/6 rounded-sm" />
+                <div className="h-2.5 bg-slate-700 w-1/4 rounded-sm mt-2 mb-1" />
+                <div className="h-2 bg-slate-200 w-full rounded-sm" />
+                <div className="h-2 bg-slate-200 w-4/6 rounded-sm" />
+                <div className="h-2 bg-slate-200 w-5/6 rounded-sm" />
+            </div>
+        )
+    },
+    {
+        id: "modern-gradient",
+        name: "Modern Gradient",
+        description: "Stylish resume with subtle gradient headers and section highlights.",
+        badge: "New",
+        accentColor: "bg-violet-500",
+        preview: (
+            <div className="w-full h-full bg-white flex flex-col gap-0 overflow-hidden">
+                <div className="w-full bg-gradient-to-r from-violet-600 to-indigo-500 p-4 flex flex-col gap-1.5">
+                    <div className="h-4 bg-white/80 w-1/2 rounded-sm" />
+                    <div className="h-2.5 bg-white/50 w-1/3 rounded-sm" />
+                    <div className="flex gap-2 mt-1">
+                        <div className="h-2 bg-white/40 w-14 rounded-sm" />
+                        <div className="h-2 bg-white/40 w-18 rounded-sm" />
+                    </div>
+                </div>
+                <div className="flex-1 p-3 flex flex-col gap-2">
+                    <div className="h-2.5 bg-violet-200 w-1/3 rounded-sm" />
+                    <div className="h-2 bg-gray-200 w-full rounded-sm" />
+                    <div className="h-2 bg-gray-200 w-5/6 rounded-sm" />
+                    <div className="h-2.5 bg-indigo-200 w-1/3 rounded-sm mt-1" />
+                    <div className="h-2 bg-gray-200 w-full rounded-sm" />
+                    <div className="h-2 bg-gray-200 w-4/6 rounded-sm" />
+                </div>
+            </div>
+        )
+    },
 ]
 
 export default function TemplatesPage() {
